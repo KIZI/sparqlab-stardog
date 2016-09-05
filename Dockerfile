@@ -28,26 +28,25 @@ RUN apk add --update wget ca-certificates bash && \
 ENV STARDOG_VER=4.1.3 \
     STARDOG_HOME=/stardog
 
-WORKDIR /
-
-# Define mountable directories.
-VOLUME ["/stardog"]
-
 COPY resources/stardog-${STARDOG_VER}.zip /
 RUN unzip stardog-${STARDOG_VER}.zip -d / && rm stardog-${STARDOG_VER}.zip
 COPY resources/stardog-license-key.bin /stardog-$STARDOG_VER/
 COPY resources/stardog.properties /
+COPY bin/*.sh /stardog-$STARDOG_VER/
+
+ADD https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech.trig /data
+ADD https://data.cssz.cz/dump/rocenka-vocabulary.trig /data
+ADD https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech-metadata.trig /data
+ADD https://data.cssz.cz/dump/pomocne-ciselniky.trig /data
+ADD http://purl.org/linked-data/cube# /data/cube.ttl
+ADD resources/setup/sparql/ /setup/sparql/
 
 WORKDIR /stardog-${STARDOG_VER}
 
+RUN bin/stardog-admin server start --disable-security --config /stardog.properties && \
+    ./seed.sh && \
+    bin/stardog-admin server stop
+
 EXPOSE 5820
 
-CMD rm /stardog/system.lock || true && \
-    cp /stardog-$STARDOG_VER/stardog-license-key.bin $STARDOG_HOME && \
-    ./bin/stardog-admin server start --disable-security --config /stardog.properties && \
-    sleep 1 && \
-    (tail -f $STARDOG_HOME/stardog.log &) && \
-    IS_TERMINATED=false && \
-    trap "IS_TERMINATED=true" SIGTERM SIGINT && \
-    while ! $IS_TERMINATED; do sleep 1; done  && \
-   ./bin/stardog-admin server stop && \
+CMD ./start.sh
