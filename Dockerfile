@@ -28,24 +28,26 @@ RUN apk add --update wget ca-certificates bash && \
 ENV STARDOG_VER=4.1.3 \
     STARDOG_HOME=/stardog
 
+RUN mkdir -p $STARDOG_HOME
 COPY resources/stardog-${STARDOG_VER}.zip /
 RUN unzip stardog-${STARDOG_VER}.zip -d / && rm stardog-${STARDOG_VER}.zip
 COPY resources/stardog-license-key.bin /stardog-$STARDOG_VER/
 COPY resources/stardog.properties /
 COPY bin/*.sh /stardog-$STARDOG_VER/
 
-ADD https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech.trig /data
-ADD https://data.cssz.cz/dump/rocenka-vocabulary.trig /data
-ADD https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech-metadata.trig /data
-ADD https://data.cssz.cz/dump/pomocne-ciselniky.trig /data
-ADD http://purl.org/linked-data/cube# /data/cube.ttl
+RUN wget https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech.trig -P /data
+RUN wget https://data.cssz.cz/dump/rocenka-vocabulary.trig -P /data
+RUN wget https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech-metadata.trig -P /data
+RUN wget https://data.cssz.cz/dump/pomocne-ciselniky.trig -P /data
+RUN wget http://purl.org/linked-data/cube# -O cube.ttl -P /data
 ADD resources/setup/sparql/ /setup/sparql/
 
 WORKDIR /stardog-${STARDOG_VER}
 
 RUN bin/stardog-admin server start --disable-security --config /stardog.properties && \
     ./seed.sh && \
-    bin/stardog-admin server stop
+    bin/stardog-admin server stop && \
+    rm -r /data
 
 EXPOSE 5820
 
