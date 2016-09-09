@@ -13,7 +13,7 @@ _term() {
 
 trap _term SIGTERM SIGINT
 
-rm $STARDOG_HOME/system.lock || true
-bin/stardog-admin server start --disable-security --config /stardog.properties
+rm $STARDOG_HOME/system.lock 2> /dev/null || true
+bin/stardog-admin server start --disable-security
 
 while ! $IS_TERMINATED; do sleep 5; done

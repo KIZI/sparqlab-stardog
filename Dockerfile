@@ -21,34 +21,27 @@ RUN apk add --update wget ca-certificates bash && \
     cd /opt && tar zxvf /tmp/${JRE}.tgz && \
     ln -s /opt/${JRE} /opt/jre && \
     ln -s /opt/jre/bin/java /usr/bin/java && \
-    apk del wget ca-certificates && \
     apk add --update unzip &&\
     rm -rf /tmp/* /var/cache/apk/*
 
 ENV STARDOG_VER=4.1.3 \
     STARDOG_HOME=/stardog
 
-RUN mkdir -p $STARDOG_HOME
+# Directory for data
+RUN mkdir -p /stardog
+
 COPY resources/stardog-${STARDOG_VER}.zip /
-RUN unzip stardog-${STARDOG_VER}.zip -d / && rm stardog-${STARDOG_VER}.zip
-COPY resources/stardog-license-key.bin /stardog-$STARDOG_VER/
-COPY resources/stardog.properties /
-COPY bin/*.sh /stardog-$STARDOG_VER/
+RUN unzip stardog-${STARDOG_VER}.zip && \
+    rm stardog-${STARDOG_VER}.zip
+COPY resources/stardog-license-key.bin $STARDOG_HOME
+COPY resources/stardog.properties $STARDOG_HOME
+COPY bin/*.sh $STARDOG_HOME-$STARDOG_VER/
+ADD resources/setup/sparql/ $STARDOG_HOME-$STARDOG_VER/setup/sparql/
 
-RUN wget https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech.trig -P /data
-RUN wget https://data.cssz.cz/dump/rocenka-vocabulary.trig -P /data
-RUN wget https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech-metadata.trig -P /data
-RUN wget https://data.cssz.cz/dump/pomocne-ciselniky.trig -P /data
-RUN wget http://purl.org/linked-data/cube# -O cube.ttl -P /data
-ADD resources/setup/sparql/ /setup/sparql/
+WORKDIR $STARDOG_HOME-$STARDOG_VER
 
-WORKDIR /stardog-${STARDOG_VER}
-
-RUN bin/stardog-admin server start --disable-security --config /stardog.properties && \
-    ./seed.sh && \
-    bin/stardog-admin server stop && \
-    rm -r /data
+RUN ["./seed.sh"] 
 
 EXPOSE 5820
 
-CMD ./start.sh
+CMD ["./start.sh"]
