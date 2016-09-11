@@ -28,7 +28,7 @@ ENV STARDOG_VER=4.1.3 \
     STARDOG_HOME=/stardog
 
 # Directory for data
-RUN mkdir -p /stardog
+RUN mkdir -p $STARDOG_HOME
 
 COPY resources/stardog-${STARDOG_VER}.zip /
 RUN unzip stardog-${STARDOG_VER}.zip && \
