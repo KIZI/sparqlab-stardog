@@ -25,7 +25,8 @@ RUN apk add --update wget ca-certificates bash && \
     rm -rf /tmp/* /var/cache/apk/*
 
 ENV STARDOG_VER=4.1.3 \
-    STARDOG_HOME=/stardog
+    STARDOG_HOME=/stardog \
+    STARDOG_JAVA_ARGS="-Xms4g -Xmx4g -XX:MaxDirectMemorySize=8g"
 
 # Directory for data
 RUN mkdir -p $STARDOG_HOME
