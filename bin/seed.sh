@@ -5,11 +5,11 @@
 
 set -e
 
-wget https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech.trig -P data
-wget https://data.cssz.cz/dump/rocenka-vocabulary.trig -P data
-wget https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech-metadata.trig -P data
-wget https://data.cssz.cz/dump/pomocne-ciselniky.trig -P data
-wget http://purl.org/linked-data/cube# -O data/cube.ttl
+wget -q https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech.trig -P data
+wget -q https://data.cssz.cz/dump/rocenka-vocabulary.trig -P data
+wget -q https://data.cssz.cz/dump/duchodci-v-cr-krajich-okresech-metadata.trig -P data
+wget -q https://data.cssz.cz/dump/pomocne-ciselniky.trig -P data
+wget -q http://purl.org/linked-data/cube# -O data/cube.ttl
 
 # Remove lock if there's one.
 rm $STARDOG_HOME/system.lock 2>/dev/null || true
